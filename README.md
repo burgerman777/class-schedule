@@ -12,4 +12,4 @@
 
 ## 在线访问
 
-部署后：`https://burgerman777.github.io/<仓库名>/`
+在线访问：`https://burgerman777.github.io/class-schedule/`
