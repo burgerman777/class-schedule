@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>大数据四班 · 课表</title>
+<style>
+  :root {
+    --bg:#0f1117; --card:#1a1d27; --border:#2a2d3a; --text:#e1e4ed;
+    --text2:#8b8fa8; --accent:#6c8cff; --accent-glow:rgba(108,140,255,0.15);
+    --green:#4ade80; --green-bg:rgba(74,222,128,0.12); --orange:#fb923c;
+    --radius:10px; --radius-sm:6px;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    line-height:1.5; max-width:1100px; margin:0 auto; padding:0 16px 40px;
+    -webkit-tap-highlight-color:transparent;
+  }
+  header { text-align:center; padding:20px 0 16px; }
+  header h1 { font-size:30px; font-weight:700; letter-spacing:2px; }
+  header .sub { color:var(--text2); font-size:13px; margin-top:6px; }
+
+  .nav { display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:18px; flex-wrap:wrap; }
+  .nav button {
+    background:var(--card); color:var(--text); border:1px solid var(--border);
+    border-radius:var(--radius-sm); padding:7px 16px; font-size:14px; cursor:pointer;
+  }
+  .nav button:hover { border-color:var(--accent); color:var(--accent); }
+  .nav select {
+    background:var(--card); color:var(--text); border:1px solid var(--border);
+    border-radius:var(--radius-sm); padding:7px 10px; font-size:14px;
+  }
+  .nav .range { color:var(--accent); font-size:14px; font-weight:600; min-width:110px; text-align:center; }
+
+  .grid-wrap { overflow-x:auto; }
+  table { width:100%; border-collapse:collapse; background:var(--card); border:1px solid var(--border); border-radius:var(--radius); }
+  th, td { border:1px solid var(--border); padding:8px 6px; text-align:center; vertical-align:top; }
+  thead th { background:var(--bg); color:var(--text2); font-size:12px; font-weight:600; }
+  thead th .d { font-size:11px; color:var(--text2); font-weight:400; }
+  td.period { background:var(--bg); color:var(--text2); font-size:12px; white-space:nowrap; }
+  td.period .t { font-size:10px; color:var(--text2); opacity:.7; }
+  td.cell { font-size:13px; font-weight:500; min-width:96px; }
+  td.cell.has { background:var(--accent-glow); color:var(--text); }
+  td.cell .course { color:var(--accent); font-weight:600; }
+  td.cell .sub { font-size:10px; color:var(--text2); margin-top:2px; word-break:break-word; }
+  td.weekend { background:rgba(255,255,255,0.015); }
+
+  .legend { text-align:center; color:var(--text2); font-size:12px; margin:16px 0 8px; }
+
+  .tt { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:16px 18px; margin-top:24px; }
+  .tt h2 { font-size:14px; color:var(--text2); margin-bottom:10px; font-weight:600; }
+  .tt table { width:100%; border-collapse:collapse; }
+  .tt th, .tt td { border:1px solid var(--border); padding:6px 10px; font-size:12px; text-align:center; }
+  .tt th { background:var(--bg); color:var(--text2); }
+
+  @media (max-width:600px) {
+    body { padding:0 8px 32px; }
+    header h1 { font-size:24px; }
+    .nav { gap:8px; }
+    .nav button { padding:6px 12px; font-size:13px; }
+    .nav .range { min-width:96px; font-size:12px; }
+    th, td { padding:5px 3px; }
+    td.period { font-size:10px; }
+    td.period .t { font-size:8px; }
+    td.cell { font-size:11px; min-width:68px; }
+    td.cell .sub { font-size:9px; }
+    .tt th, .tt td { font-size:11px; padding:5px 6px; }
+  }
+</style>
+</head>
+<body>
+  <header>
+    <h1>大数据四班</h1>
+    <div class="sub">2026-2027 学年第一学期 · 秋季课表</div>
+  </header>
+
+  <div class="nav">
+    <button onclick="move(-1)">‹ 上一周</button>
+    <select id="sel" onchange="jump()"></select>
+    <div class="range" id="range"></div>
+    <button onclick="move(1)">下一周 ›</button>
+  </div>
+
+  <div class="grid-wrap">
+    <table id="grid"></table>
+  </div>
+  <div class="legend">💡 悬停课程可看教师 / 教室 · 周六日无课 · 第二大节第一教学楼 10:00 上课，其他楼 9:50</div>
+
+  <div class="tt">
+    <h2>作息时间（哈尔滨石油学院）</h2>
+    <table>
+      <thead><tr><th>大节</th><th>节次</th><th>第一教学楼</th><th>其他教学楼</th></tr></thead>
+      <tbody><tr><td>第一大节</td><td>第1-2节</td><td>08:00-09:35</td><td>08:00-09:35</td></tr><tr><td>第二大节</td><td>第3-4节</td><td>10:00-11:35</td><td>09:50-11:25</td></tr><tr><td>第三大节</td><td>第5-6节</td><td>13:30-14:55</td><td>13:30-14:55</td></tr><tr><td>第四大节</td><td>第7-8节</td><td>15:10-16:35</td><td>15:10-16:35</td></tr><tr><td>第五大节</td><td>第9-10节</td><td>17:30-18:55</td><td>17:30-18:55</td></tr><tr><td>第六大节</td><td>第11-12节</td><td>19:10-20:35</td><td>19:10-20:35</td></tr></tbody>
+    </table>
+  </div>
+
+<script>
+const WEEKS = [{"week": 1, "range": "08-24 ~ 08-30", "dates": ["08-24", "08-25", "08-26", "08-27", "08-28", "08-29", "08-30"], "grid": [[[], [], [], [], [], []], [[], [], [], [], [], []], [[], [], [], [], [], []], [[], [], [], [], [], []], [[], [], [], [], [], []], [[], [], [], [], [], []], [[], [], [], [], [], []]]}, {"week": 2, "range": "08-31 ~ 09-06", "dates": ["08-31", "09-01", "09-02", "09-03", "09-04", "09-05", "09-06"], "grid": [[[{"course": "应用操作系统", "teacher": "王光鑫", "room": "第二教学楼0211", "time": "08:00-09:35"}], [{"course": "分布式数据库", "teacher": "杨俊婷", "room": "第二教学楼0211", "time": "09:50-11:25"}], [{"course": "Scala开发实践", "teacher": "王树芬", "room": "第二教学楼0201", "time": "13:30-14:55"}], [{"course": "数据结构（Python）", "teacher": "李百峰", "room": "第二教学楼0303", "time": "15:10-16:35"}], [], []], [[{"course": "大数据可视化", "teacher": "王清洋", "room": "第二教学楼0411", "time": "08:00-09:35"}], [], [], [], [], []], [[], [{"course": "Python基础及数据分析", "teacher": "李洋", "room": "第二教学楼0103", "time": "09:50-11:25"}], [], [{"course": "大数据可视化", "teacher": "王清洋", "room": "第二实验楼0408-0409-0410", "time": "15:10-16:35"}], [], []], [[], [], [{"course": "Python基础及数据分析", "teacher": "李洋", "room": "第二实验楼0408-0409-0410", "time": "13:30-14:55"}], [{"course": "中国近现代史纲要", "teacher": "王俊彦", "room": "第一教学楼0218", "time": "15:10-16:35"}], [], []], [[{"course": "数据结构（Python）", "teacher": "李百峰", "room": "第二教学楼0101", "time": "08:00-09:35"}], [], [], [{"course": "中国近现代史纲要", "teacher": "王俊彦", "room": "第一教学楼0218", "time": "15:10-16:35"}], [], []], [[], [], [], [], [], []], [[], [], [], [], [], []]]}, {"week": 3, "range": "09-07 ~ 09-13", "dates": ["09-07", "09-08", "09-09", "09-10", "09-11", "09-12", "09-13"], "grid": [[[{"course": "应用操作系统", "teacher": "王光鑫", "room": "第二教学楼0211", "time": "08:00-09:35"}], [{"course": "分布式数据库", "teacher": "杨俊婷", "room": "第二教学楼0211", "time": "09:50-11:25"}], [], [{"course": "数据结构（Python）", "teacher": "李百峰", "room": "第二教学楼0303", "time": "15:10-16:35"}], [], []], [[{"course": "大数据可视化", "teacher": "王清洋", "room": "第二教学楼0411", "time": "08:00-09:35"}], [], [], [], [], []], [[], [], [{"course": "Scala开发实践", "teacher": "王树芬", "room": "第二教学楼0201", "time": "13:30-14:55"}], [], [], []], [[], [], [], [{"course": "中国近现代史纲要", "teacher": "王俊彦", "room": "第一教学楼0218", "time": "15:10-16:35"}], [], []], [[], [], [{"course": "Python基础及数据分析", "teacher": "李洋", "room": "第二教学楼0401", "time": "13:30-14:55"}], [{"course": "中国近现代史纲要", "teacher": "王俊彦", "room": "第一教学楼0218", "time": "15:10-16:35"}], [], []], [[], [], [], [], [], []], [[], [], [], [], [], []]]}, {"week": 4, "range": "09-14 ~ 09-20", "dates": ["09-14", "09-15", "09-16", "09-17", "09-18", "09-19", "09-20"], "grid": [[[{"course": "应用操作系统", "teacher": "王光鑫", "room": "第二教学楼0211", "time": "08:00-09:35"}], [{"course": "分布式数据库", "teacher": "杨俊婷", "room": "第二教学楼0211", "time": "09:50-11:25"}], [], [{"course": "数据结构（Python）", "teacher": "李百峰", "room": "第二教学楼0303", "time": "15:10-16:35"}], [], []], [[{"course": "大数据可视化", "teacher": "王清洋", "room": "第二教学楼0411", "time": "08:00-09:35"}], [], [], [], [], []], [[], [{"course": "大数据可视化", "teacher": "王清洋", "room": "第二实验楼0408-0409-0410", "time": "09:50-11:25"}], [{"course": "Scala开发实践", "teacher": "王树芬", "room": "第二教学楼0201", "time": "13:30-14:55"}], [], [], []], [[], [{"course": "Python基础及数据分析", "teacher": "李洋", "room": "第二实验楼0408-0409-0410", "time": "09:50-11:25"}], [], [{"course": "中国近现代史纲要", "teacher": "王俊彦", "room": "第一教学楼0218", "time": "15:10-16:35"}], [], []], [[{"course": "数据结构（Python）", "teacher": "李百峰", "room": "第二教学楼0101", "time": "08:00-09:35"}], [], [{"course": "Python基础及数据分析", "teacher": "李洋", "room": "第二教学楼0401", "time": "13:30-14:55"}], [{"course": "中国近现代史纲要", "teacher": "王俊彦", "room": "第一教学楼0218", "time": "15:10-16:35"}], [], []], [[], [], [], [], [], []], [[], [], [], [], [], []]]}, {"week": 5, "range": "09-21 ~ 09-27", "dates": ["09-21", "09-22", "09-23", "09-24", "09-25", "09-26", "09-27"], "grid": [[[], [], [], [{"course": "数据结构（Python）", "teacher": "李百峰", "room": "第二教学楼0303", "time": "15:10-16:35"}], [], []], [[], [{"course": "Python基础及数据分析", "teacher": "李洋", "room": "第二实验楼0408-0409-0410", "time": "09:50-11:25"}], [], [], [], []], [[], [{"course": "大数据可视化", "teacher": "王清洋", "room": "第二实验楼0408-0409-0410", "time": "09:50-11:25"}], [], [], [], []], [[], [], [], [{"course": "中国近现代史纲要", "teacher": "王俊彦", "room": "第一教学楼0218", "time": "15:10-16:35"}], [], []], [[], [], [], [{"course": "中国近现代史纲要", "teacher": "王俊彦", "room": "第一教学楼0218", "time": "15:10-16:35"}], [], []], [[], [], [], [], [], []], [[], [], [], [], [], []]]}, {"week": 6, "range": "09-28 ~ 10-04", "dates": ["09-28", "09-29", "09-30", "10-01", "10-02", "10-03", "10-04"], "grid": [[[{"course": "应用操作系统", "teacher": "王光鑫", "room": "第二教学楼0211", "time": "08:00-09:35"}], [{"course": "分布式数据库", "teacher": "杨俊婷", "room": "第二教学楼0211", "time": "09:50-11:25"}], [], [{"course": "数据结构（Python）", "teacher": "李百峰", "room": "第二教学楼0303", "time": "15:10-16:35"}], [], []], [[{"course": "大数据可视化", "teacher": "王清洋", "room": "第二教学楼0411", "time": "08:00-09:35"}], [{"course": "Python基础及数据分析", "teacher": "李洋", "room": "第二实验楼0408-0409-0410", "time": "09:50-11:25"}], [], [], [], []], [[], [{"course": "大数据可视化", "teacher": "王清洋", "room": "第二实验楼0408-0409-0410", "time": "09:50-11:25"}], [{"course": "Scala开发实践", "teacher": "王树芬", "room": "第二教学楼0201", "time": "13:30-14:55"}], [{"course": "Python基础及数据分析", "teacher": "李洋", "room": "第二教学楼0209", "time": "15:10-16:35"}], [], []], [[], [{"course": "数据结构（Python）", "teacher": "李百峰", "room": "第二实验楼0408-0409-0410", "time": "09:50-11:25"}], [], [{"course": "中国近现代史纲要", "teacher": "王俊彦", "room": "第一教学楼0218", "time": "15:10-16:35"}], [], []], [[], [], [], [{"course": "中国近现代史纲要", "teacher": "王俊彦", "room": "第一教学楼0218", "time": "15:10-16:35"}], [], []], [[], [], [], [], [], []], [[], [], [], [], [], []]]}, {"week": 7, "range": "10-05 ~ 10-11", "dates": ["10-05", "10-06", "10-07", "10-08", "10-09", "10-10", "10-11"], "grid": [[[{"course": "应用操作系统", "teacher": "王光鑫", "room": "第二教学楼0211", "time": "08:00-09:35"}], [{"course": "分布式数据库", "teacher": "杨俊婷", "room": "第二教学楼0211", "time": "09:50-11:25"}], [], [{"course": "数据结构（Python）", "teacher": "李百峰", "room": "第二教学楼0303", "time": "15:10-16:35"}], [], []], [[{"course": "大数据可视化", "teacher": "王清洋", "room": "第二教学楼0411", "time": "08:00-09:35"}], [], [], [], [], []], [[], [], [{"course": "Scala开发实践", "teacher": "王树芬", "room": "第二教学楼0201", "time": "13:30-14:55"}], [], [], []], [[], [], [], [{"course": "中国近现代史纲要", "teacher": "王俊彦", "room": "第一教学楼0218", "time": "15:10-16:35"}], [], []], [[], [], [{"course": "Python基础及数据分析", "teacher": "李洋", "room": "第二教学楼0401", "time": "13:30-14:55"}], [{"course": "中国近现代史纲要", "teacher": "王俊彦", "room": "第一教学楼0218", "time": "15:10-16:35"}], [], []], [[], [], [], [], [], []], [[], [], [], [], [], []]]}, {"week": 8, "range": "10-12 ~ 10-18", "dates": ["10-12", "10-13", "10-14", "10-15", "10-16", "10-17", "10-18"], "grid": [[[{"course": "应用操作系统", "teacher": "王光鑫", "room": "第二教学楼0211", "time": "08:00-09:35"}], [{"course": "分布式数据库", "teacher": "杨俊婷", "room": "第二教学楼0211", "time": "09:50-11:25"}], [], [{"course": "数据结构（Python）", "teacher": "李百峰", "room": "第二教学楼0303", "time": "15:10-16:35"}], [], []], [[{"course": "大数据可视化", "teacher": "王清洋", "room": "第二教学楼0411", "time": "08:00-09:35"}], [], [], [], [], []], [[], [{"course": "大数据可视化", "teacher": "王清洋", "room": "第二实验楼0408-0409-0410", "time": "09:50-11:25"}], [{"course": "Scala开发实践", "teacher": "王树芬", "room": "第二教学楼0201", "time": "13:30-14:55"}], [], [{"course": "形势与政策（Ⅰ）", "teacher": "王瑞", "room": "第一教学楼0101", "time": "17:30-18:55"}], []], [[], [{"course": "Python基础及数据分析", "teacher": "李洋", "room": "第二实验楼0408-0409-0410", "time": "09:50-11:25"}], [], [{"course": "中国近现代史纲要", "teacher": "王俊彦", "room": "第一教学楼0218", "time": "15:10-16:35"}], [{"course": "形势与政策（Ⅰ）", "teacher": "王瑞", "room": "第一教学楼0101", "time": "17:30-18:55"}], []], [[{"course": "数据结构（Python）", "teacher": "李百峰", "room": "第二教学楼0101", "time": "08:00-09:35"}], [], [{"course": "Python基础及数据分析", "teacher": "李洋", "room": "第二教学楼0401", "time": "13:30-14:55"}], [{"course": "中国近现代史纲要", "teacher": "王俊彦", "room": "第一教学楼0218", "time": "15:10-16:35"}], [], []], [[], [], [], [], [], []], [[], [], [], [], [], []]]}, {"week": 9, "range": "10-19 ~ 10-25", "dates": ["10-19", "10-20", "10-21", "10-22", "10-23", "10-24", "10-25"], "grid": [[[], [], [], [], [], []], [[], [], [], [], [], []], [[], [{"course": "大数据可视化", "teacher": "王清洋", "room": "第二实验楼0408-0409-0410", "time": "09:50-11:25"}], [], [], [{"course": "形势与政策（Ⅰ）", "teacher": "王瑞", "room": "第一教学楼0104", "time": "17:30-18:55"}, {"course": "形势与政策（Ⅰ）", "teacher": "王瑞", "room": "第一教学楼0104", "time": "17:30-18:55"}], []], [[], [{"course": "数据结构（Python）", "teacher": "李百峰", "room": "第二实验楼0408-0409-0410", "time": "09:50-11:25"}], [], [{"course": "中国近现代史纲要", "teacher": "王俊彦", "room": "第一教学楼0218", "time": "15:10-16:35"}], [], []], [[], [{"course": "形势与政策（Ⅰ）", "teacher": "王瑞", "room": "第一教学楼0101", "time": "10:00-11:35"}], [{"course": "Python基础及数据分析", "teacher": "李洋", "room": "第二实验楼0408-0409-0410", "time": "13:30-14:55"}], [{"course": "中国近现代史纲要", "teacher": "王俊彦", "room": "第一教学楼0218", "time": "15:10-16:35"}], [], []], [[], [], [], [], [], []], [[], [], [], [], [], []]]}, {"week": 10, "range": "10-26 ~ 11-01", "dates": ["10-26", "10-27", "10-28", "10-29", "10-30", "10-31", "11-01"], "grid": [[[{"course": "应用操作系统", "teacher": "王光鑫", "room": "第二教学楼0211", "time": "08:00-09:35"}], [{"course": "分布式数据库", "teacher": "杨俊婷", "room": "第二教学楼0211", "time": "09:50-11:25"}], [{"course": "Python基础及数据分析", "teacher": "李洋", "room": "第二教学楼0211", "time": "13:30-14:55"}], [{"course": "数据结构（Python）", "teacher": "李百峰", "room": "第二教学楼0303", "time": "15:10-16:35"}], [], []], [[{"course": "大数据可视化", "teacher": "王清洋", "room": "第二教学楼0411", "time": "08:00-09:35"}], [], [], [], [], []], [[], [{"course": "大数据可视化", "teacher": "王清洋", "room": "第二实验楼0408-0409-0410", "time": "09:50-11:25"}], [{"course": "Scala开发实践", "teacher": "王树芬", "room": "第二教学楼0201", "time": "13:30-14:55"}], [], [], []], [[], [{"course": "Python基础及数据分析", "teacher": "李洋", "room": "第二实验楼0408-0409-0410", "time": "09:50-11:25"}], [], [{"course": "中国近现代史纲要", "teacher": "王俊彦", "room": "第一教学楼0218", "time": "15:10-16:35"}], [], []], [[{"course": "数据结构（Python）", "teacher": "李百峰", "room": "第二教学楼0101", "time": "08:00-09:35"}], [], [], [], [], []], [[], [], [], [], [], []], [[], [], [], [], [], [{"course": "中国近现代史纲要", "teacher": "王俊彦", "room": "形势与政策（Ⅰ）[实践]", "time": "19:10-20:35"}]]]}, {"week": 11, "range": "11-02 ~ 11-08", "dates": ["11-02", "11-03", "11-04", "11-05", "11-06", "11-07", "11-08"], "grid": [[[{"course": "应用操作系统", "teacher": "王光鑫", "room": "第二教学楼0211", "time": "08:00-09:35"}], [{"course": "分布式数据库", "teacher": "杨俊婷", "room": "第二教学楼0211", "time": "09:50-11:25"}], [], [], [], []], [[{"course": "大数据可视化", "teacher": "王清洋", "room": "第二教学楼0411", "time": "08:00-09:35"}], [], [], [], [], []], [[], [], [{"course": "Scala开发实践", "teacher": "王树芬", "room": "第二教学楼0201", "time": "13:30-14:55"}], [], [], []], [[], [{"course": "数据结构（Python）", "teacher": "李百峰", "room": "第二实验楼0408-0409-0410", "time": "09:50-11:25"}], [], [], [], []], [[], [], [{"course": "Python基础及数据分析", "teacher": "李洋", "room": "第二教学楼0401", "time": "13:30-14:55"}], [], [], []], [[], [], [], [], [], []], [[], [], [], [], [], [{"course": "中国近现代史纲要", "teacher": "王俊彦", "room": "中国近现代史纲要[基础理论]", "time": "19:10-20:35"}]]]}, {"week": 12, "range": "11-09 ~ 11-15", "dates": ["11-09", "11-10", "11-11", "11-12", "11-13", "11-14", "11-15"], "grid": [[[], [], [], [{"course": "数据结构（Python）", "teacher": "李百峰", "room": "第二教学楼0303", "time": "15:10-16:35"}], [], []], [[{"course": "大数据可视化", "teacher": "王清洋", "room": "第二教学楼0411", "time": "08:00-09:35"}], [], [], [], [], []], [[], [{"course": "大数据可视化", "teacher": "王清洋", "room": "第二实验楼0408-0409-0410", "time": "09:50-11:25"}], [], [], [], []], [[], [{"course": "Python基础及数据分析", "teacher": "李洋", "room": "第二实验楼0408-0409-0410", "time": "09:50-11:25"}], [], [], [], []], [[{"course": "数据结构（Python）", "teacher": "李百峰", "room": "第二教学楼0101", "time": "08:00-09:35"}], [], [{"course": "Python基础及数据分析", "teacher": "李洋", "room": "第二教学楼0401", "time": "13:30-14:55"}], [], [], []], [[], [], [], [], [], []], [[], [], [], [], [], [{"course": "中国近现代史纲要", "teacher": "王俊彦", "room": "", "time": "19:10-20:35"}]]]}, {"week": 13, "range": "11-16 ~ 11-22", "dates": ["11-16", "11-17", "11-18", "11-19", "11-20", "11-21", "11-22"], "grid": [[[{"course": "应用操作系统", "teacher": "王光鑫", "room": "第二教学楼0211", "time": "08:00-09:35"}], [{"course": "分布式数据库", "teacher": "杨俊婷", "room": "第二教学楼0211", "time": "09:50-11:25"}], [], [{"course": "数据结构（Python）", "teacher": "李百峰", "room": "第二教学楼0303", "time": "15:10-16:35"}], [], []], [[], [], [], [], [], []], [[], [{"course": "大数据可视化", "teacher": "王清洋", "room": "第二实验楼0408-0409-0410", "time": "09:50-11:25"}], [{"course": "Scala开发实践", "teacher": "王树芬", "room": "第二教学楼0201", "time": "13:30-14:55"}], [], [], []], [[], [{"course": "Python基础及数据分析", "teacher": "李洋", "room": "第二实验楼0408-0409-0410", "time": "09:50-11:25"}], [], [], [], []], [[], [], [], [], [], []], [[], [], [], [], [], []], [[], [], [], [], [], [{"course": "中国近现代史纲要", "teacher": "王俊彦", "room": "中国近现代史纲要[实践]", "time": "19:10-20:35"}, {"course": "中国近现代史纲要", "teacher": "王俊彦", "room": "", "time": "19:10-20:35"}]]]}, {"week": 14, "range": "11-23 ~ 11-29", "dates": ["11-23", "11-24", "11-25", "11-26", "11-27", "11-28", "11-29"], "grid": [[[], [], [{"course": "Python基础及数据分析", "teacher": "李洋", "room": "第二教学楼0203", "time": "13:30-14:55"}], [{"course": "数据结构（Python）", "teacher": "李百峰", "room": "第二教学楼0303", "time": "15:10-16:35"}], [], []], [[{"course": "大数据可视化", "teacher": "王清洋", "room": "第二教学楼0411", "time": "08:00-09:35"}], [], [], [], [], []], [[], [{"course": "大数据可视化", "teacher": "王清洋", "room": "第二实验楼0408-0409-0410", "time": "09:50-11:25"}], [], [], [], []], [[], [{"course": "Python基础及数据分析", "teacher": "李洋", "room": "第二实验楼0408-0409-0410", "time": "09:50-11:25"}], [], [], [], []], [[{"course": "数据结构（Python）", "teacher": "李百峰", "room": "第二教学楼0101", "time": "08:00-09:35"}], [], [], [], [], []], [[], [], [], [], [], []], [[], [], [], [], [], []]]}, {"week": 15, "range": "11-30 ~ 12-06", "dates": ["11-30", "12-01", "12-02", "12-03", "12-04", "12-05", "12-06"], "grid": [[[{"course": "应用操作系统", "teacher": "王光鑫", "room": "第二教学楼0211", "time": "08:00-09:35"}], [{"course": "分布式数据库", "teacher": "杨俊婷", "room": "第二教学楼0211", "time": "09:50-11:25"}], [], [], [], []], [[{"course": "大数据可视化", "teacher": "王清洋", "room": "第二教学楼0411", "time": "08:00-09:35"}], [], [], [], [], []], [[], [], [{"course": "Scala开发实践", "teacher": "王树芬", "room": "第二教学楼0201", "time": "13:30-14:55"}], [], [], []], [[], [{"course": "数据结构（Python）", "teacher": "李百峰", "room": "第二实验楼0408-0409-0410", "time": "09:50-11:25"}], [], [], [], []], [[], [], [{"course": "Python基础及数据分析", "teacher": "李洋", "room": "第二教学楼0401", "time": "13:30-14:55"}], [], [], []], [[], [], [], [], [], []], [[], [], [], [], [], []]]}, {"week": 16, "range": "12-07 ~ 12-13", "dates": ["12-07", "12-08", "12-09", "12-10", "12-11", "12-12", "12-13"], "grid": [[[], [], [], [{"course": "数据结构（Python）", "teacher": "李百峰", "room": "第二教学楼0303", "time": "15:10-16:35"}], [], []], [[{"course": "大数据可视化", "teacher": "王清洋", "room": "第二教学楼0411", "time": "08:00-09:35"}], [], [], [], [], []], [[], [{"course": "大数据可视化", "teacher": "王清洋", "room": "第二实验楼0408-0409-0410", "time": "09:50-11:25"}], [], [], [], []], [[], [], [], [{"course": "Python基础及数据分析", "teacher": "李洋", "room": "第二教学楼0101", "time": "15:10-16:35"}], [], []], [[{"course": "数据结构（Python）", "teacher": "李百峰", "room": "第二教学楼0101", "time": "08:00-09:35"}], [], [], [{"course": "Python基础及数据分析", "teacher": "李洋", "room": "第二实验楼0408-0409-0410", "time": "15:10-16:35"}], [], []], [[], [], [], [], [], []], [[], [], [], [], [], []]]}, {"week": 17, "range": "12-14 ~ 12-20", "dates": ["12-14", "12-15", "12-16", "12-17", "12-18", "12-19", "12-20"], "grid": [[[{"course": "工程实习（数据采集及处理）", "teacher": "井睿勍", "room": "第二实验楼0408-0409-0410", "time": "08:00-09:35"}], [{"course": "工程实习（数据采集及处理）", "teacher": "井睿勍", "room": "第二实验楼0408-0409-0410", "time": "09:50-11:25"}], [], [{"course": "数据结构（Python）", "teacher": "李百峰", "room": "第二教学楼0303", "time": "15:10-16:35"}], [], []], [[{"course": "工程实习（数据采集及处理）", "teacher": "井睿勍", "room": "第二实验楼0408-0409-0410", "time": "08:00-09:35"}], [{"course": "工程实习（数据采集及处理）", "teacher": "井睿勍", "room": "第二实验楼0408-0409-0410", "time": "09:50-11:25"}], [], [], [], []], [[], [{"course": "大数据可视化", "teacher": "王清洋", "room": "第二实验楼0408-0409-0410", "time": "09:50-11:25"}], [], [], [], []], [[{"course": "工程实习（数据采集及处理）", "teacher": "井睿勍", "room": "第二实验楼0408-0409-0410", "time": "08:00-09:35"}], [{"course": "工程实习（数据采集及处理）", "teacher": "井睿勍", "room": "第二实验楼0408-0409-0410", "time": "09:50-11:25"}], [], [], [], []], [[{"course": "Python基础及数据分析", "teacher": "李洋", "room": "第二实验楼0408-0409-0410", "time": "08:00-09:35"}], [], [], [], [], []], [[], [], [], [], [], []], [[], [], [], [], [], []]]}, {"week": 18, "range": "12-21 ~ 12-27", "dates": ["12-21", "12-22", "12-23", "12-24", "12-25", "12-26", "12-27"], "grid": [[[], [], [], [], [], []], [[], [], [], [], [{"course": "数据可视化课程设计", "teacher": "王清洋", "room": "第二实验楼0408-0409-0410", "time": "17:30-18:55"}], [{"course": "数据可视化课程设计", "teacher": "王清洋", "room": "第二实验楼0408-0409-0410", "time": "19:10-20:35"}]], [[], [], [], [], [], []], [[], [], [{"course": "数据可视化课程设计", "teacher": "王清洋", "room": "第二实验楼0408-0409-0410", "time": "13:30-14:55"}], [{"course": "数据可视化课程设计", "teacher": "王清洋", "room": "第二实验楼0408-0409-0410", "time": "15:10-16:35"}], [], []], [[], [], [{"course": "数据可视化课程设计", "teacher": "王清洋", "room": "第二实验楼0408-0409-0410", "time": "13:30-14:55"}], [{"course": "数据可视化课程设计", "teacher": "王清洋", "room": "第二实验楼0408-0409-0410", "time": "15:10-16:35"}], [], []], [[], [], [], [], [], []], [[], [], [], [], [], []]]}, {"week": 19, "range": "12-28 ~ 01-03", "dates": ["12-28", "12-29", "12-30", "12-31", "01-01", "01-02", "01-03"], "grid": [[[], [], [], [], [], []], [[], [], [], [], [], []], [[], [], [], [], [], []], [[], [], [], [], [], []], [[], [], [], [], [], []], [[], [], [], [], [], []], [[], [], [], [], [], []]]}, {"week": 20, "range": "01-04 ~ 01-10", "dates": ["01-04", "01-05", "01-06", "01-07", "01-08", "01-09", "01-10"], "grid": [[[], [], [], [], [], []], [[], [], [], [], [], []], [[], [], [], [], [], []], [[], [], [], [], [], []], [[], [], [], [], [], []], [[], [], [], [], [], []], [[], [], [], [], [], []]]}, {"week": 21, "range": "待定", "dates": ["", "", "", "", "", "", ""], "grid": [[[], [], [], [], [], []], [[], [], [], [], [], []], [[], [], [], [], [], []], [[], [], [], [], [], []], [[], [], [], [], [], []], [[], [], [], [], [], []], [[], [], [], [], [], []]]}, {"week": 22, "range": "待定", "dates": ["", "", "", "", "", "", ""], "grid": [[[], [], [], [], [], []], [[], [], [], [], [], []], [[], [], [], [], [], []], [[], [], [], [], [], []], [[], [], [], [], [], []], [[], [], [], [], [], []], [[], [], [], [], [], []]]}];
+let cur = 1; // 默认第 2 周
+const DAYS = ['周一','周二','周三','周四','周五','周六','周日'];
+
+function buildSel() {
+  const sel = document.getElementById('sel');
+  WEEKS.forEach((w, i) => {
+    const o = document.createElement('option');
+    o.value = i;
+    o.textContent = '第' + w.week + '周（' + w.range + '）';
+    sel.appendChild(o);
+  });
+  sel.value = cur;
+}
+function render() {
+  const w = WEEKS[cur];
+  document.getElementById('range').textContent = w.range;
+  document.getElementById('sel').value = cur;
+  let h = '<thead><tr><th>节次</th>';
+  DAYS.forEach((d, di) => {
+    h += '<th>' + d + '<br><span class="d">' + (w.dates[di] || '') + '</span></th>';
+  });
+  h += '</tr></thead><tbody>';
+  const P = ['第一大节','第二大节','第三大节','第四大节','第五大节','第六大节'];
+  const PT = ['08:00-09:35','09:50-11:25','13:30-14:55','15:10-16:35','17:30-18:55','19:10-20:35'];
+  P.forEach((p, pi) => {
+    h += '<tr><td class="period">' + p + '<br><span class="t">' + PT[pi] + '</span></td>';
+    DAYS.forEach((d, di) => {
+      const cs = w.grid[di][pi];
+      const wk = (di >= 5) ? ' weekend' : '';
+      if (!cs.length) { h += '<td class="cell' + wk + '"></td>'; return; }
+      let inner = cs.map(c => '<div class="course">' + c.course + '</div><div class="sub">' + c.teacher + '</div><div class="sub">' + c.room + '</div>').join('');
+      h += '<td class="cell has' + wk + '">' + inner + '</td>';
+    });
+    h += '</tr>';
+  });
+  h += '</tbody>';
+  document.getElementById('grid').innerHTML = h;
+}
+function move(d) { cur = Math.max(0, Math.min(WEEKS.length - 1, cur + d)); render(); }
+function jump() { cur = parseInt(document.getElementById('sel').value, 10); render(); }
+// 移动端左右滑动切换周
+let touchX = null;
+document.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; }, { passive:true });
+document.addEventListener('touchend', e => {
+  if (touchX === null) return;
+  const dx = e.changedTouches[0].clientX - touchX;
+  if (Math.abs(dx) > 50) { dx < 0 ? move(1) : move(-1); }
+  touchX = null;
+}, { passive:true });
+buildSel(); render();
+</script>
+</body>
+</html>
