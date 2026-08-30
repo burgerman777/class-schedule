@@ -42,6 +42,7 @@
   thead th .d { font-size:11px; color:var(--text2); font-weight:400; }
   td.period { background:var(--bg); color:var(--text2); font-size:12px; white-space:nowrap; }
   td.period .t { font-size:10px; color:var(--text2); opacity:.7; }
+  td.period .p-short { display:none; }
   td.cell { font-size:13px; font-weight:500; min-width:96px; }
   td.cell.has { background:var(--accent-glow); color:var(--text); }
   td.cell .course { color:var(--accent); font-weight:600; }
@@ -70,8 +71,10 @@
     th, td { padding:4px 2px; }
     thead th { font-size:11px; }
     thead th .d { font-size:9px; }
-    td.period { writing-mode:vertical-rl; text-orientation:mixed; font-size:10px; }
-    td.period .t { display:none; }
+    td.period { font-size:10px; }
+    td.period .p-full { display:none; }
+    td.period .p-short { display:inline; }
+    td.period .t { font-size:8px; }
     td.cell { font-size:10px; min-width:0; word-break:break-word; }
     td.cell .course { font-size:10px; }
     td.cell .sub { font-size:8px; }
@@ -114,6 +117,7 @@ let dir = 0; // 滑动方向
 const DAYS = ['周一','周二','周三','周四','周五','周六','周日'];
 const P = ['第一大节','第二大节','第三大节','第四大节','第五大节','第六大节'];
 const PT = ['08:00-09:35','09:50-11:25','13:30-14:55','15:10-16:35','17:30-18:55','19:10-20:35'];
+const P_SHORT = ['一大','二大','三大','四大','五大','六大'];
 
 function buildSel() {
   const sel = document.getElementById('sel');
@@ -132,7 +136,7 @@ function buildTable(w) {
   });
   h += '</tr></thead><tbody>';
   P.forEach((p, pi) => {
-    h += '<tr><td class="period">' + p + '<br><span class="t">' + PT[pi] + '</span></td>';
+    h += '<tr><td class="period"><span class="p-full">' + p + '</span><span class="p-short">' + P_SHORT[pi] + '</span><br><span class="t">' + PT[pi] + '</span></td>';
     DAYS.forEach((d, di) => {
       const cs = w.grid[di][pi];
       const wk = (di >= 5) ? ' weekend' : '';
@@ -153,11 +157,11 @@ function render() {
   const sign = dir >= 0 ? 1 : -1;
   gridEl.style.transition = 'opacity .15s ease, transform .15s ease';
   gridEl.style.opacity = '0';
-  gridEl.style.transform = 'translateX(' + (40 * sign) + 'px)';
+  gridEl.style.transform = 'translateX(' + (-40 * sign) + 'px)';
   setTimeout(() => {
     gridEl.innerHTML = buildTable(w);
     gridEl.style.transition = 'none';
-    gridEl.style.transform = 'translateX(' + (-40 * sign) + 'px)';
+    gridEl.style.transform = 'translateX(' + (40 * sign) + 'px)';
     requestAnimationFrame(() => requestAnimationFrame(() => {
       gridEl.style.transition = 'opacity .25s ease, transform .25s ease';
       gridEl.style.opacity = '1';
